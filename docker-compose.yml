@@ -1,0 +1,59 @@
+version: "3.7"
+services:
+  orders_app:
+    build: ./orders-app
+    ports:
+      - 5000:5000
+    env_file:
+      - .env
+    depends_on:
+      - orders_db
+      - payments_db
+    networks:
+      - app
+
+  payments_app:
+    build: ./payments-app
+    ports:
+      - 8000:8000
+    env_file:
+      - .env
+    depends_on:
+      - payments_db
+      - orders_db
+    networks:
+      - app
+      
+  orders_db:
+    container_name: orders_db
+    image: mysql:8
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - 3306:3306
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: orders_app
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+    networks:
+      - app
+
+  payments_db:
+    container_name: payments_db
+    image: mysql:8
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - 3307:3306
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: payments_app
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+    networks:
+      - app
+
+networks:
+  app:
+    driver: bridge
